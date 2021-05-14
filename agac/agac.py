@@ -3,6 +3,7 @@ import time
 import gym
 import numpy as np
 import tensorflow as tf
+import os
 
 from core import logger, tf_util
 from core.base_class import ActorCriticRLModel, SetVerbosity, TensorboardWriter
@@ -413,6 +414,12 @@ class AGAC(ActorCriticRLModel):
                                                 undiscounted_reward.reshape((self.n_envs, self.n_steps)),
                                                 masks.reshape((self.n_envs, self.n_steps)),
                                                 writer, self.num_timesteps)
+
+                if update % 1000000 == 1:
+                    update_dir = os.path.join(self.tensorboard_log, str(update))
+                    os.makedirs(update_dir, exist_ok=True)
+                    print("saving model to: ", update_dir)
+                    self.save(os.path.join(update_dir, "model.zip"))
 
                 if self.verbose >= 1 and (update % log_interval == 0 or update == 1):
                     explained_var = explained_variance(values, returns)
